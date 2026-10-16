@@ -25,7 +25,7 @@
   <div class="esquinas" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
 
   <header class="marca">
-    <h1 class="titulo">Terra <em><span class="pre">in</span>cognita</em></h1>
+    <h1 class="titulo"><span id="t-mundo">Terra</span> <em><span class="pre">in</span>cognita</em></h1>
     <p class="sub" id="sub">Atlas de secretos</p>
   </header>
 
@@ -38,6 +38,7 @@
     <div><span>Zoom</span><b id="h-zoom">1,00×</b></div>
     <div><span>Giro</span><b id="h-giro">0 °/s</b></div>
     <div><span>Señal</span><b class="barras" id="h-senal"><i></i><i></i><i></i><i></i><i></i></b></div>
+    <div id="fila-radio" hidden><span>Radio</span><b><span class="barras" id="h-radio"><i></i><i></i><i></i><i></i><i></i></span><em class="h-aviso" id="h-radio-txt"></em></b></div>
   </div>
   <div class="hud hud-der" id="ayuda">Arrastra para girar · Rueda para acercar</div>
   <div class="teclas" id="teclas" aria-hidden="true"></div>
@@ -45,16 +46,18 @@
   <aside class="cuaderno" id="cuaderno" aria-hidden="true" aria-labelledby="cuaderno-titulo">
     <div class="c-cabeza">
       <div>
-        <p class="c-etq">Expedición nº 001</p>
+        <p class="c-etq" id="c-etq">Expedición nº 001</p>
         <h2 id="cuaderno-titulo">Cuaderno de campo</h2>
       </div>
       <button class="c-cerrar" id="cerrar-cuaderno" type="button" aria-label="Cerrar el cuaderno">✕</button>
     </div>
-    <p class="c-intro"><span class="n-secretos mayus">Diez</span> secretos escondidos en el mundo. Cada pista apunta a uno; el nombre aparece cuando lo encuentras.</p>
+    <p class="c-intro" id="c-intro"></p>
     <ol class="lista" id="lista"></ol>
+    <p class="c-fuentes" id="c-fuentes"></p>
     <p class="c-credito" id="c-credito-linea" hidden>Un juego de <a id="c-credito" target="_blank" rel="noopener"><b id="c-credito-nombre"></b><span class="flecha"> ↗</span></a></p>
     <div class="c-pie">
       <button type="button" id="ver-final" class="c-boton" hidden>Ver el final otra vez</button>
+      <button type="button" id="viajar" class="c-boton" hidden>Viajar a la Luna →</button>
       <button type="button" id="borrar" class="c-boton c-boton-tenue">Borrar progreso</button>
     </div>
   </aside>
@@ -81,10 +84,10 @@
   <!-- créditos: salen al terminar el final (los diez secretos) -->
   <div class="creditos" id="creditos" hidden role="dialog" aria-modal="true" aria-labelledby="creditos-nombre">
     <div class="creditos-caja">
-      <p class="creditos-etq">Mundo cartografiado por</p>
+      <p class="creditos-etq" id="creditos-etq">Mundo cartografiado por</p>
       <h2 class="creditos-nombre" id="creditos-nombre"></h2>
       <div class="creditos-linea" aria-hidden="true"></div>
-      <p class="creditos-txt">Gracias por explorar hasta el último punto.</p>
+      <p class="creditos-txt" id="creditos-txt"></p>
       <div class="creditos-botones">
         <a class="creditos-enlace" id="creditos-enlace" target="_blank" rel="noopener">Ver su LinkedIn <span aria-hidden="true">↗</span></a>
         <button type="button" class="creditos-cerrar" id="creditos-cerrar">Seguir explorando</button>
@@ -93,6 +96,7 @@
   </div>
 
   <script src="datos/puntos.js"></script>
+  <script src="datos/luna.js"></script>
   <script src="js/motor.js"></script>
   <script src="js/interfaz.js"></script>
   <script src="js/huevos/01-null-island.js"></script>
@@ -106,6 +110,14 @@
   <script src="js/huevos/09-punto-azul.js"></script>
   <script src="js/huevos/10-paciencia.js"></script>
   <script src="js/huevos/final.js"></script>
+  <script src="js/huevos/viaje.js"></script>
+  <script src="js/huevos/luna-01-apolo-11.js"></script>
+  <script src="js/huevos/luna-02-cara-oculta.js"></script>
+  <script src="js/huevos/luna-03-salida-de-la-tierra.js"></script>
+  <script src="js/huevos/luna-04-houston.js"></script>
+  <script src="js/huevos/luna-05-luna-de-sangre.js"></script>
+  <script src="js/huevos/luna-06-pluma-y-martillo.js"></script>
+  <script src="js/huevos/luna-final.js"></script>
   <script src="js/inicio.js"></script>
 </body>
 </html>

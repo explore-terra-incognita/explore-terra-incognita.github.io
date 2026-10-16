@@ -37,7 +37,10 @@
     hueso: [236, 230, 214],
     mar: [118, 132, 152],
     acento: [212, 255, 62],
-    tenue: [140, 136, 128]
+    tenue: [140, 136, 128],
+    luna: [224, 226, 232],
+    acentoTierra: [212, 255, 62],
+    acentoLuna: [111, 227, 255]   // la Exploración 2 cambia el verde por cian
   };
   var C = TI.color;
 
@@ -173,6 +176,9 @@
   }
   var TIERRA = filtrar(DAT.tierra.n, DAT.tierra.bits, 1), NT = TIERRA.length / 3;
   var MAR = filtrar(DAT.mar.n, DAT.mar.bits, 1), NM = MAR.length / 3;
+  // la Luna (Exploración 2): todos los puntos de su espiral, con su brillo en 4 niveles (0 mares … 3 rayos)
+  var DL = window.TI_LUNA, LUNA = DL ? G.fibonacci(DL.n) : new Float32Array(0), NL = LUNA.length / 3, NIV = new Uint8Array(NL);
+  if (DL) { var sl = atob(DL.niveles); for (var il = 0; il < NL; il++) NIV[il] = (sl.charCodeAt(il >> 2) >> (6 - 2 * (il & 3))) & 3; }
 
   /* ------------------------------------------------------------------ el motor */
   var E = TI.motor = {
@@ -186,8 +192,10 @@
     escena: null, bloqueado: false, ligero: false,
     lectura: 5000,  // ms extra que la tarjeta de cada secreto se queda en pantalla (Pau, 16-10-2026: «no da tiempo a leerlo»)
     ultimoInput: 0, giroAuto: 0, estela: 0, compresion: 0,
-    tierra: { n: NT, xyz: TIERRA }, mar: { n: NM, xyz: MAR },
+    tierra: { n: NT, xyz: TIERRA }, mar: { n: NM, xyz: MAR }, luna: { n: NL, xyz: LUNA, nivel: NIV },
+    mundo: 'tierra',   // 'tierra' (Exploración 1) o 'luna' (Exploración 2)
     P: {
+      lx: new Float32Array(NL), ly: new Float32Array(NL), lz: new Float32Array(NL),
       tx: new Float32Array(NT), ty: new Float32Array(NT), tz: new Float32Array(NT),
       mx: new Float32Array(NM), my: new Float32Array(NM), mz: new Float32Array(NM),
       px: new Float32Array(NT), py: new Float32Array(NT)   // fotograma anterior (estelas)
@@ -233,6 +241,13 @@
   function proyectar() {
     var m = E.rot, R = E.R, cx = E.cx, cy = E.cy, P = E.P, i, x, y, z;
     var m0 = m[0], m1 = m[1], m2 = m[2], m3 = m[3], m4 = m[4], m5 = m[5], m6 = m[6], m7 = m[7], m8 = m[8];
+    if (E.mundo === 'luna') {
+      for (i = 0; i < NL; i++) {
+        x = LUNA[i * 3]; y = LUNA[i * 3 + 1]; z = LUNA[i * 3 + 2];
+        P.lx[i] = cx + (m0 * x + m1 * y + m2 * z) * R; P.ly[i] = cy - (m3 * x + m4 * y + m5 * z) * R; P.lz[i] = m6 * x + m7 * y + m8 * z;
+      }
+      return;
+    }
     for (i = 0; i < NT; i++) {
       x = TIERRA[i * 3]; y = TIERRA[i * 3 + 1]; z = TIERRA[i * 3 + 2];
       P.tx[i] = cx + (m0 * x + m1 * y + m2 * z) * R; P.ty[i] = cy - (m3 * x + m4 * y + m5 * z) * R; P.tz[i] = m6 * x + m7 * y + m8 * z;
@@ -306,7 +321,13 @@
   /* ---------- atmósfera ---------- */
   E.dibujarAtmosfera = function (alfa) {
     alfa = alfa == null ? 1 : alfa;
-    var R = E.R, g = ctx.createRadialGradient(E.cx, E.cy, R * 0.92, E.cx, E.cy, R * 1.32);
+    var R = E.R, g;
+    if (E.mundo === 'luna') {   // sin aire: ni halo ni brillo, solo el disco y un borde muy fino
+      ctx.fillStyle = 'rgba(0,0,0,' + (0.45 * alfa).toFixed(3) + ')'; ctx.beginPath(); ctx.arc(E.cx, E.cy, R, 0, TAU); ctx.fill();
+      ctx.strokeStyle = U.rgba(C.luna, 0.1 * alfa); ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(E.cx, E.cy, R + 0.5, 0, TAU); ctx.stroke();
+      return;
+    }
+    g = ctx.createRadialGradient(E.cx, E.cy, R * 0.92, E.cx, E.cy, R * 1.32);
     g.addColorStop(0, U.rgba(C.hueso, 0.05 * alfa)); g.addColorStop(0.18, U.rgba(C.hueso, 0.035 * alfa)); g.addColorStop(1, U.rgba(C.hueso, 0));
     ctx.fillStyle = g; ctx.beginPath(); ctx.arc(E.cx, E.cy, R * 1.32, 0, TAU); ctx.fill();
     // el disco, un pelo más oscuro que el fondo, y su borde
@@ -323,6 +344,7 @@
   /* op: alfa, tierra (color), mar (color), conMar, dorso (alfa de los puntos de detrás), escala, lente */
   E.dibujarPuntos = function (op) {
     op = op || {};
+    if (E.mundo === 'luna') return dibujarLuna(op);
     var P = E.P, alfa = op.alfa == null ? 1 : op.alfa, colT = op.tierra || C.hueso, colM = op.mar || C.mar;
     var rT = E.radioPunto() * (op.escala || 1), rM = rT * 0.5, conMar = op.conMar !== false && !(E.ligero && E.R < 200);
     var lente = op.lente && E.puntero.dentro && !E.arrastre && !E.lenteOculta;
@@ -383,6 +405,110 @@
     }
   };
 
+  /* ---------- la Luna ---------- */
+  // 4 niveles de brillo × 3 bandas de profundidad; los mares, más tenues y pequeños, se pintan como cuadraditos (más rápido)
+  var A_L = [0.1, 0.28, 0.64, 1], F_L = [0.56, 0.78, 1, 1.22], A_Z = [0.42, 0.74, 1], F_Z = [0.74, 0.9, 1];
+  var cubosL = [], cuentaL = new Int32Array(12), lenteL = new Float32Array(NL * 4);
+  for (var bl = 0; bl < 12; bl++) cubosL.push(new Float32Array(NL * 2));
+  function dibujarLuna(op) {
+    var P = E.P, alfa = op.alfa == null ? 1 : op.alfa, col = op.color || C.luna, rT = E.radioPunto() * (op.escala || 1);
+    var lente = op.lente && E.puntero.dentro && !E.arrastre && !E.lenteOculta;
+    var px = E.puntero.x, py = E.puntero.y, L = 78, L2 = L * L, nl = 0, i, k;
+    cuentaL.fill(0);
+    for (i = 0; i < NL; i++) {
+      var z = P.lz[i]; if (z <= 0.02) continue;
+      if (lente) {
+        var dx = P.lx[i] - px, dy = P.ly[i] - py, d2 = dx * dx + dy * dy;
+        if (d2 < L2) { var u = Math.sqrt(d2) / L; lenteL[nl++] = px + dx * (1 + 0.6 * (1 - u)); lenteL[nl++] = py + dy * (1 + 0.6 * (1 - u)); lenteL[nl++] = 1 - u; lenteL[nl++] = NIV[i]; continue; }
+      }
+      k = NIV[i] * 3 + (z < 0.3 ? 0 : z < 0.65 ? 1 : 2);
+      cubosL[k][cuentaL[k]++] = P.lx[i]; cubosL[k][cuentaL[k]++] = P.ly[i];
+    }
+    for (k = 0; k < 12; k++) {
+      var n = cuentaL[k]; if (!n) continue;
+      var nivel = (k / 3) | 0, banda = k % 3, c = cubosL[k], r = rT * F_L[nivel] * F_Z[banda];
+      ctx.fillStyle = U.rgba(col, A_L[nivel] * A_Z[banda] * alfa); ctx.beginPath();
+      if (nivel < 2) { var s2 = r * 1.7; for (var j = 0; j < n; j += 2) ctx.rect(c[j] - s2 / 2, c[j + 1] - s2 / 2, s2, s2); }
+      else for (var j2 = 0; j2 < n; j2 += 2) { ctx.moveTo(c[j2] + r, c[j2 + 1]); ctx.arc(c[j2], c[j2 + 1], r, 0, TAU); }
+      ctx.fill();
+    }
+    if (nl) {   // la lupa, como en la Tierra
+      var tinte = U.mezcla(col, C.acento, Math.pow(E.senal, 1.3));
+      for (var pasada = 0; pasada < 2; pasada++) {
+        ctx.fillStyle = U.rgba(tinte, pasada ? 1 : 0.5 * alfa); ctx.beginPath();
+        for (var jl = 0; jl < nl; jl += 4) {
+          if ((lenteL[jl + 3] >= 2) !== !!pasada) continue;
+          var rl = rT * F_L[lenteL[jl + 3]] * (1 + 1.25 * lenteL[jl + 2]); ctx.moveTo(lenteL[jl] + rl, lenteL[jl + 1]); ctx.arc(lenteL[jl], lenteL[jl + 1], rl, 0, TAU);
+        }
+        ctx.fill();
+      }
+    }
+  }
+
+  /* ---------- un cuerpo pequeño (la Tierra en el cielo de la Luna, el viaje, esquemas) ----------
+     Dibuja la Tierra o la Luna en (x0, y0) con radio R y orientación M, con menos puntos si es pequeño. */
+  E.dibujarCuerpo = function (cuerpo, x0, y0, R, M, op) {
+    op = op || {};
+    var luna = cuerpo === 'luna', A = luna ? LUNA : TIERRA, n = A.length / 3, alfa = op.alfa == null ? 1 : op.alfa;
+    var objetivo = Math.max(160, Math.PI * R * R * 0.02), paso = Math.max(1, Math.floor(n / 2 / objetivo));
+    var r = op.radio || U.clamp(R * 0.011, 0.55, 3.2), col = op.color || (luna ? C.luna : C.hueso);
+    var caminos = [new Path2D(), new Path2D(), new Path2D(), new Path2D()], m = M;
+    for (var i = 0; i < n; i += paso) {
+      var x = A[i * 3], y = A[i * 3 + 1], z = A[i * 3 + 2], vz = m[6] * x + m[7] * y + m[8] * z;
+      if (vz <= 0.04) continue;
+      var sx = x0 + (m[0] * x + m[1] * y + m[2] * z) * R, sy = y0 - (m[3] * x + m[4] * y + m[5] * z) * R;
+      var k = luna ? NIV[i] : (vz > 0.5 ? 3 : 2);
+      if (r < 1.3) caminos[k].rect(sx - r, sy - r, 2 * r, 2 * r); else { caminos[k].moveTo(sx + r, sy); caminos[k].arc(sx, sy, r, 0, TAU); }
+    }
+    var alfas = luna ? A_L : [0, 0, 0.5, 0.95];
+    for (var k2 = 0; k2 < 4; k2++) { if (!alfas[k2]) continue; ctx.fillStyle = U.rgba(col, alfas[k2] * alfa); ctx.fill(caminos[k2]); }
+  };
+
+  /* ---------- la Tierra en el cielo de la Luna ----------
+     La Luna enseña siempre la misma cara a la Tierra: en el cuerpo lunar, la Tierra está en la dirección (0° 0°).
+     Si esa dirección apunta hacia el fondo, la Tierra se ve detrás de la Luna (proyectada como las estrellas). */
+  var rotFondo = Mx.mirando(18, -25);
+  E.tierraEnCielo = function () {
+    var m = E.rot, x = m[2], y = m[5], z = m[8];
+    if (z > -0.03) return null;
+    var F = Math.max(E.W, E.H) * 0.62, sx = E.cx + x / -z * F, sy = E.cy - y / -z * F;
+    return { x: sx, y: sy, r: 14 + 5 * Math.min(2, E.zoom), d: Math.hypot(sx - E.cx, sy - E.cy) };
+  };
+  // la Tierra pequeña, azulada y medio iluminada (el Sol le da por la izquierda)
+  E.dibujarTierra = function (x, y, r, op) {
+    op = op || {};
+    var a = op.alfa == null ? 1 : op.alfa;
+    FX.brillo(x, y, r * 2.6, [120, 170, 255], 0.2 * a);
+    ctx.fillStyle = 'rgba(12,20,38,' + (0.92 * a).toFixed(3) + ')'; ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill();
+    E.dibujarCuerpo('tierra', x, y, r, op.rot || rotFondo, { color: [170, 204, 255], alfa: a, radio: Math.max(0.55, r * 0.028) });
+    ctx.save(); ctx.beginPath(); ctx.arc(x, y, r + 0.6, 0, TAU); ctx.clip();
+    var g = ctx.createLinearGradient(x - r * 0.25, y - r * 0.15, x + r, y + r * 0.25);
+    g.addColorStop(0, 'rgba(9,9,10,0)'); g.addColorStop(0.42, 'rgba(9,9,10,' + (0.82 * a).toFixed(3) + ')'); g.addColorStop(1, 'rgba(9,9,10,' + (0.95 * a).toFixed(3) + ')');
+    ctx.fillStyle = g; ctx.fillRect(x - r - 2, y - r - 2, 2 * r + 4, 2 * r + 4); ctx.restore();
+    ctx.strokeStyle = 'rgba(160,200,255,' + (0.45 * a).toFixed(3) + ')'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(x, y, r + 0.7, Math.PI * 0.55, Math.PI * 1.45); ctx.stroke();
+  };
+  function dibujarTierraFondo() {
+    var T = E.tierraEnCielo(); if (!T || T.d < E.R - T.r) return;   // detrás de la Luna, no se ve
+    ctx.save();
+    // si asoma por el borde, se recorta lo que tapa la Luna (solo en un cuadrado alrededor de la Tierra: recortar toda la pantalla es caro)
+    if (T.d < E.R + T.r) { var k = T.r * 2.8, p = new Path2D(); p.rect(T.x - k, T.y - k, 2 * k, 2 * k); p.arc(E.cx, E.cy, E.R, 0, TAU); ctx.clip(p, 'evenodd'); }
+    E.dibujarTierra(T.x, T.y, T.r);
+    ctx.restore();
+  }
+
+  /* ---------- cambiar de mundo ---------- */
+  E.cambiarMundo = function (m, op) {
+    op = op || {};
+    E.mundo = m;
+    TI.color.acento = m === 'luna' ? C.acentoLuna : C.acentoTierra;
+    document.documentElement.classList.toggle('luna', m === 'luna');
+    document.documentElement.classList.remove('sin-cursor');
+    E.lenteOculta = false; E.vel.w = 0; historialGiro.length = 0; E.giro2s = 0; E.senal = 0; cam = null;
+    if (op.rot) E.rot = op.rot;
+    if (op.zoom != null) E.zoom = op.zoom;
+    emitir('mundo', { mundo: m });
+  };
+
   /* ---------- ayudas de dibujo para las escenas ---------- */
   var tmpA = [0, 0, 0, 0];
   var FX = TI.fx = {
@@ -437,6 +563,44 @@
       ctx.fillText(s, x, y);
       if ('letterSpacing' in ctx) ctx.letterSpacing = '0px';
     },
+    // encuadre rasante: (lat, lon) a la altura fy de la pantalla (0 arriba, 1 abajo), visto con «incl» grados de inclinación;
+    // el centro del globo queda por debajo de la pantalla y la superficie se ve de lado, con relieve
+    rasante: function (lat, lon, zoom, incl, fy, dur) {
+      var Rt = E.Rbase * zoom;
+      E.camara(lat - incl, lon, zoom, dur || 2000, 0, null, E.H * fy + Math.sin(incl * D2R) * Rt - E.H / 2);
+    },
+    // ejes locales de un punto (c: vertical, e: este, n: norte) y un punto a (dx, dy) grados de él
+    marcoLocal: function (lat, lon) {
+      var c = G.vec(lat, lon), e = [c[2], 0, -c[0]], l = Math.hypot(e[0], e[2]) || 1; e = [e[0] / l, 0, e[2] / l];
+      return { c: c, e: e, n: [c[1] * e[2] - c[2] * e[1], c[2] * e[0] - c[0] * e[2], c[0] * e[1] - c[1] * e[0]] };
+    },
+    local: function (m, dx, dy) {
+      var v = [m.c[0] + (m.e[0] * dx + m.n[0] * dy) * D2R, m.c[1] + (m.e[1] * dx + m.n[1] * dy) * D2R, m.c[2] + (m.e[2] * dx + m.n[2] * dy) * D2R];
+      var l = Math.hypot(v[0], v[1], v[2]); return [v[0] / l, v[1] / l, v[2] / l];
+    },
+    // un suelo de puntos denso alrededor de un lugar, para las vistas rasantes (rejilla con algo de desorden)
+    suelo: function (m, radio, paso, semilla) {
+      var r = U.azar(semilla || 5), o = [];
+      for (var y = -radio; y <= radio; y += paso) for (var x = -radio; x <= radio; x += paso) {
+        var dx = x + (r() - 0.5) * paso * 0.9, dy = y + (r() - 0.5) * paso * 0.9, d = Math.sqrt(dx * dx + dy * dy) / radio;
+        if (d > 1) continue;
+        o.push({ v: FX.local(m, dx, dy), b: r(), f: 1 - d * d });
+      }
+      return o;
+    },
+    // lo pinta con perspectiva fingida: cuanto más abajo en pantalla (más cerca), más grande
+    dibujarSuelo: function (pts, alfa, col) {
+      var q = [0, 0, 0, 0], caminos = [], k, i;
+      for (k = 0; k < 9; k++) caminos.push(new Path2D());
+      for (i = 0; i < pts.length; i++) {
+        var p = pts[i]; E.proy(p.v, q); if (q[2] <= 0 || q[1] < -10 || q[1] > E.H + 10) continue;
+        var prof = U.clamp(q[1] / E.H, 0, 1.1), r = 0.45 + 2.1 * prof * prof;
+        k = (p.b > 0.8 ? 2 : p.b > 0.45 ? 1 : 0) * 3 + (p.f > 0.66 ? 2 : p.f > 0.33 ? 1 : 0);
+        caminos[k].moveTo(q[0] + r, q[1]); caminos[k].arc(q[0], q[1], r, 0, TAU);
+      }
+      var AB = [0.16, 0.3, 0.5], AF = [0.35, 0.7, 1];
+      for (k = 0; k < 9; k++) { ctx.fillStyle = U.rgba(col || C.luna, AB[(k / 3) | 0] * AF[k % 3] * alfa); ctx.fill(caminos[k]); }
+    },
     // marca de un lugar: punto, anillo y nombre
     marca: function (x, y, nombre, a, col, lado) {
       col = col || C.acento;
@@ -466,6 +630,7 @@
     ctx.fillStyle = U.rgba(C.fondo, 1); ctx.fillRect(0, 0, E.W, E.H);
     var esc = E.escena, s = esc && esc.s, t = esc ? esc.t : 0;
     dibujarEstrellas();
+    if (E.mundo === 'luna' && !(s && s.sinTierraFondo)) dibujarTierraFondo();
     if (s && s.fondo) s.fondo(ctx, t);
     if (!(s && s.sinAtmosfera)) E.dibujarAtmosfera(s && s.atmosfera != null ? s.atmosfera : 1);
     if (s && s.puntos) s.puntos(ctx, t); else E.dibujarPuntos({ lente: !s });
@@ -511,7 +676,8 @@
     E.estela = U.clamp((E.velGiro - 7) / 14, 0, 1);
     // la compresión de «alejarse más de la cuenta» vuelve sola
     E.compresion *= Math.pow(0.9, dt / 16);
-    if (++cuadros % 90 === 0) { E.rot = Mx.ortonormal(E.rot); E.est = Mx.ortonormal(E.est); }
+    rotFondo = Mx.mul(rotFondo, Mx.eje(0, 1, 0, dt * TAU / 50000));
+    if (++cuadros % 90 === 0) { E.rot = Mx.ortonormal(E.rot); E.est = Mx.ortonormal(E.est); rotFondo = Mx.ortonormal(rotFondo); }
 
     if (esc) {
       esc.t += dt;
@@ -605,6 +771,7 @@
     cam = null;
     E.arrastre = { x: ev.clientX, y: ev.clientY, x0: ev.clientX, y0: ev.clientY, t0: E.t, movido: 0, giro: 0, muestras: [] };
     E.vel.w = 0;
+    emitir('bajar', datosPuntero(ev.clientX, ev.clientY));
   }
   function alMover(ev) {
     marcar(); posicion(ev);
@@ -643,6 +810,7 @@
       t0 = A.muestras[i]; sx += A.muestras[i + 1] * A.muestras[i + 3]; sy += A.muestras[i + 2] * A.muestras[i + 3]; sa += A.muestras[i + 3];
     }
     var dtm = Math.max(16, E.t - t0 + 16);
+    var ds = datosPuntero(A.x0, A.y0); ds.movido = A.movido; ds.dur = E.t - A.t0; emitir('subir', ds);
     if (sa > 0.002) { var l = Math.hypot(sx, sy) || 1; E.vel = { x: sx / l, y: sy / l, z: 0, w: Math.min(0.045, sa / dtm) }; }
     if (A.movido < 6 && E.t - A.t0 < 600) {
       var d = datosPuntero(ev.clientX, ev.clientY);
