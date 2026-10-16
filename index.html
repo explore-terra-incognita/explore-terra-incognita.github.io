@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Terra Incognita</title>
+  <meta name="description" content="Un globo de puntos con diez secretos escondidos.">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Terra Incognita">
+  <meta property="og:description" content="Un globo de puntos con diez secretos escondidos. Gíralo, acércate, toca… y encuéntralos.">
+  <meta property="og:url" content="https://paumoratosebastia.github.io/terra-incognita/">
+  <meta property="og:image" content="https://paumoratosebastia.github.io/terra-incognita/compartir.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="theme-color" content="#09090a">
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body>
+  <canvas id="lienzo" aria-label="Globo terráqueo hecho de puntos. Arrástralo para girarlo."></canvas>
+  <div class="grano" id="grano" aria-hidden="true"></div>
+  <div class="vineta" aria-hidden="true"></div>
+  <div class="esquinas" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+
+  <header class="marca">
+    <h1 class="titulo">Terra <em><span class="pre">in</span>cognita</em></h1>
+    <p class="sub" id="sub">Atlas de secretos</p>
+  </header>
+
+  <button class="b-cuaderno" id="b-cuaderno" type="button" aria-expanded="false" aria-controls="cuaderno">
+    <span class="b-fila"><span class="b-etq">Cuaderno</span><span class="b-cont" id="contador">00/10</span></span>
+    <span class="segmentos" id="segmentos" aria-hidden="true"></span>
+  </button>
+
+  <div class="hud hud-izq" id="hud" aria-hidden="true">
+    <div><span>Zoom</span><b id="h-zoom">1,00×</b></div>
+    <div><span>Giro</span><b id="h-giro">0 °/s</b></div>
+    <div><span>Señal</span><b class="barras" id="h-senal"><i></i><i></i><i></i><i></i><i></i></b></div>
+  </div>
+  <div class="hud hud-der" id="ayuda">Arrastra para girar · Rueda para acercar</div>
+  <div class="teclas" id="teclas" aria-hidden="true"></div>
+
+  <aside class="cuaderno" id="cuaderno" aria-hidden="true" aria-labelledby="cuaderno-titulo">
+    <div class="c-cabeza">
+      <div>
+        <p class="c-etq">Expedición nº 001</p>
+        <h2 id="cuaderno-titulo">Cuaderno de campo</h2>
+      </div>
+      <button class="c-cerrar" id="cerrar-cuaderno" type="button" aria-label="Cerrar el cuaderno">✕</button>
+    </div>
+    <p class="c-intro"><span class="n-secretos mayus">Diez</span> secretos escondidos en el mundo. Cada pista apunta a uno; el nombre aparece cuando lo encuentras.</p>
+    <ol class="lista" id="lista"></ol>
+    <div class="c-pie">
+      <button type="button" id="ver-final" class="c-boton" hidden>Ver el final otra vez</button>
+      <button type="button" id="borrar" class="c-boton c-boton-tenue">Borrar progreso</button>
+    </div>
+  </aside>
+
+  <section class="tarjeta" id="tarjeta" aria-live="polite">
+    <div class="t-etq" id="t-etq"></div>
+    <h2 class="t-tit" id="t-tit"></h2>
+    <p class="t-txt" id="t-txt"></p>
+    <div class="t-pie" id="t-pie"></div>
+  </section>
+
+  <div class="aviso" id="aviso" role="status"></div>
+  <button class="saltar" id="saltar" type="button">Saltar <kbd>Esc</kbd></button>
+
+  <div class="intro" id="intro" hidden>
+    <div class="intro-caja">
+      <p class="intro-etq">Expedición nº 001</p>
+      <h2>Terra <em>incognita</em></h2>
+      <p>Este mundo esconde <span class="n-secretos">diez</span> secretos entre sus puntos. Gíralo, acércate, toca, teclea… o no hagas nada. Lo que encuentres quedará apuntado en el cuaderno.</p>
+      <button type="button" id="empezar">Empezar a explorar</button>
+    </div>
+  </div>
+
+  <script src="datos/puntos.js"></script>
+  <script src="js/motor.js"></script>
+  <script src="js/interfaz.js"></script>
+  <script src="js/huevos/01-null-island.js"></script>
+  <script src="js/huevos/02-atlantida.js"></script>
+  <script src="js/huevos/03-punto-nemo.js"></script>
+  <script src="js/huevos/04-aurora.js"></script>
+  <script src="js/huevos/05-antipodas.js"></script>
+  <script src="js/huevos/06-vertigo.js"></script>
+  <script src="js/huevos/07-bermudas.js"></script>
+  <script src="js/huevos/08-konami.js"></script>
+  <script src="js/huevos/09-punto-azul.js"></script>
+  <script src="js/huevos/10-paciencia.js"></script>
+  <script src="js/huevos/final.js"></script>
+  <script src="js/inicio.js"></script>
+</body>
+</html>
