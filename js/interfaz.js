@@ -11,6 +11,8 @@
   var estado = { hallados: {}, final: false, introVista: false };
   var $ = function (id) { return document.getElementById(id); };
   var raiz = document.documentElement;
+  // quién ha hecho el juego: sale en los créditos al terminar el final y, después, al pie del cuaderno
+  var AUTOR = { nombre: 'Pau Morató Sebastià', linkedin: '' };
 
   /* ---------- registro ----------
      Cada secreto: { id, n, nombre, tipo, pista, lugar?: [lat, lon], detectar(api), escena(motor, datos) } */
@@ -28,7 +30,7 @@
   /* ---------- disparar un secreto ---------- */
   I.disparar = function (h, datos, op) {
     op = op || {};
-    if (E.escena || !$('intro').hidden) return false;
+    if (E.escena || !$('intro').hidden || !$('creditos').hidden) return false;
     cerrarCuaderno();
     var nuevo = !estado.hallados[h.id] && !op.prueba;
     if (nuevo) { estado.hallados[h.id] = Date.now(); guardar(); }
@@ -57,8 +59,24 @@
     E.reproducir({ id: 'final', escena: function (motor) { return final.escena(motor, { desde: primero, hasta: ultimo, huevos: huevos }); } }, function () {
       if (cuantos() === huevos.length) { estado.final = true; guardar(); }
       pintarLista();
+      mostrarCreditos();
     });
   };
+
+  /* ---------- créditos ---------- */
+  function mostrarCreditos() {
+    var c = $('creditos');
+    c.hidden = false; c.classList.remove('saliendo'); void c.offsetWidth; c.classList.add('visible');
+    E.bloqueado = true;
+    setTimeout(function () { var b = $('creditos-enlace').hidden ? $('creditos-cerrar') : $('creditos-enlace'); try { b.focus({ preventScroll: true }); } catch (e) { b.focus(); } }, 2600);
+  }
+  function cerrarCreditos() {
+    var c = $('creditos'); if (c.hidden) return;
+    c.classList.remove('visible'); c.classList.add('saliendo');
+    E.bloqueado = false; E.ultimoInput = E.t;
+    setTimeout(function () { c.hidden = true; c.classList.remove('saliendo'); }, 650);
+  }
+  I.mostrarCreditos = mostrarCreditos;
 
   /* ---------- tarjeta ---------- */
   I.tarjeta = function (t) {
@@ -128,6 +146,7 @@
     var seg = $('segmentos'); seg.innerHTML = '';
     for (var i = 0; i < huevos.length; i++) seg.appendChild(el('i', i < n ? 'si' : ''));
     $('ver-final').hidden = !(estado.final || (PRUEBA && final));
+    $('c-credito-linea').hidden = !estado.final;
     raiz.classList.toggle('cognita', !!estado.final);
   }
 
@@ -207,7 +226,13 @@
       if (!window.confirm('¿Borrar todos los secretos encontrados en este navegador?')) return;
       estado = { hallados: {}, final: false, introVista: true }; guardar(); pintarLista();
     });
-    window.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && !E.escena) cerrarCuaderno(); });
+    window.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && !E.escena) { cerrarCuaderno(); cerrarCreditos(); } });
+
+    $('creditos-nombre').textContent = AUTOR.nombre;
+    $('c-credito-nombre').textContent = AUTOR.nombre;
+    if (AUTOR.linkedin) { $('creditos-enlace').href = AUTOR.linkedin; $('c-credito').href = AUTOR.linkedin; }
+    else $('creditos-enlace').hidden = true;
+    $('creditos-cerrar').addEventListener('click', cerrarCreditos);
 
     pintarLista();
 

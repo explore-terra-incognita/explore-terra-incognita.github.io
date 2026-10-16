@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Terra Incognita</title>
   <meta name="description" content="Un globo de puntos con diez secretos escondidos.">
+  <meta name="author" content="Pau Morató Sebastià">
   <link rel="icon" type="image/png" href="favicon.png">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Terra Incognita">
@@ -51,6 +52,7 @@
     </div>
     <p class="c-intro"><span class="n-secretos mayus">Diez</span> secretos escondidos en el mundo. Cada pista apunta a uno; el nombre aparece cuando lo encuentras.</p>
     <ol class="lista" id="lista"></ol>
+    <p class="c-credito" id="c-credito-linea" hidden>Un juego de <a id="c-credito" target="_blank" rel="noopener"><b id="c-credito-nombre"></b><span class="flecha"> ↗</span></a></p>
     <div class="c-pie">
       <button type="button" id="ver-final" class="c-boton" hidden>Ver el final otra vez</button>
       <button type="button" id="borrar" class="c-boton c-boton-tenue">Borrar progreso</button>
@@ -73,6 +75,20 @@
       <h2>Terra <em>incognita</em></h2>
       <p>Este mundo esconde <span class="n-secretos">diez</span> secretos entre sus puntos. Gíralo, acércate, toca, teclea… o no hagas nada. Lo que encuentres quedará apuntado en el cuaderno.</p>
       <button type="button" id="empezar">Empezar a explorar</button>
+    </div>
+  </div>
+
+  <!-- créditos: salen al terminar el final (los diez secretos) -->
+  <div class="creditos" id="creditos" hidden role="dialog" aria-modal="true" aria-labelledby="creditos-nombre">
+    <div class="creditos-caja">
+      <p class="creditos-etq">Mundo cartografiado por</p>
+      <h2 class="creditos-nombre" id="creditos-nombre"></h2>
+      <div class="creditos-linea" aria-hidden="true"></div>
+      <p class="creditos-txt">Gracias por explorar hasta el último punto.</p>
+      <div class="creditos-botones">
+        <a class="creditos-enlace" id="creditos-enlace" target="_blank" rel="noopener">Ver su LinkedIn <span aria-hidden="true">↗</span></a>
+        <button type="button" class="creditos-cerrar" id="creditos-cerrar">Seguir explorando</button>
+      </div>
     </div>
   </div>
 
