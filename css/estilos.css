@@ -187,6 +187,7 @@ button:focus-visible { outline: 1px solid var(--acento); outline-offset: 3px; }
 .intro-caja { max-width: 560px; text-align: center; }
 .intro h2 { margin: 6px 0 18px; font: 400 clamp(54px, 9vw, 96px)/0.9 var(--serif); letter-spacing: -0.02em; }
 .intro p { margin: 0 auto 30px; max-width: 470px; font: 400 21px/1.38 var(--serif); color: var(--hueso-2); }
+.intro .intro-etq { margin: 0 0 6px; max-width: none; font: 400 11px/1.4 var(--mono); letter-spacing: 0.18em; text-transform: uppercase; color: var(--acento); }
 .intro button {
   padding: 15px 24px; border: 1px solid var(--acento); color: var(--acento);
   font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; transition: background 0.25s, color 0.25s;
