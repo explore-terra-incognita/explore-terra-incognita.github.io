@@ -12,7 +12,7 @@
   var $ = function (id) { return document.getElementById(id); };
   var raiz = document.documentElement;
   // quién ha hecho el juego: sale en los créditos al terminar el final y, después, al pie del cuaderno
-  var AUTOR = { nombre: 'Pau Morató Sebastià', linkedin: '' };
+  var AUTOR = { nombre: 'Pau Morató Sebastià', linkedin: 'https://www.linkedin.com/in/pau-morat%C3%B3-sebasti%C3%A0-5554a01b2' };
 
   /* ---------- registro ----------
      Cada secreto: { id, n, nombre, tipo, pista, lugar?: [lat, lon], detectar(api), escena(motor, datos) } */
