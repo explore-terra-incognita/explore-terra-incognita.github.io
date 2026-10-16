@@ -12,6 +12,7 @@
       api.en('clic', function (d) { if (api.motor.cercaDe(d, 0, 0, 1.8, 12)) api.disparar(); });
     },
     escena: function (E) {
+      var L = E.lectura;   // tiempo extra para leer la tarjeta (motor.js)
       var r = U.azar(101), N = 190, part = [], centro = G.vec(0, 0);
       for (var i = 0; i < N; i++) {
         var k = Math.floor(r() * E.tierra.n), o = [E.tierra.xyz[k * 3], E.tierra.xyz[k * 3 + 1], E.tierra.xyz[k * 3 + 2]];
@@ -22,25 +23,25 @@
       }
       var q = [0, 0, 0, 0], q2 = [0, 0, 0, 0];
       return {
-        duracion: 11500,
+        duracion: 11500 + L,
         tarjeta: {
-          en: 4300, hasta: 10400,
+          en: 4300, hasta: 10400 + L,
           titulo: 'Null Island',
           texto: 'La isla que no existe. Cuando un mapa no sabe dónde poner un dato, lo deja en 0° 0°, y aquí se amontona todo lo que se perdió por el camino. En el sitio de verdad solo hay una boya meteorológica.',
           pie: '0°00′ N · 0°00′ E · Golfo de Guinea'
         },
         inicio: function () { E.camara(0, 0, 1.75, 1800, 0.06); },
         puntos: function (ctx, t) {
-          E.dibujarPuntos({ alfa: 1 - 0.3 * U.meseta(t, 600, 1800, 9000, 10800) });
+          E.dibujarPuntos({ alfa: 1 - 0.3 * U.meseta(t, 600, 1800, 9000 + L, 10800 + L) });
           // el ecuador y el meridiano de Greenwich se cruzan aquí
-          var g = U.sale(U.tramo(t, 300, 2200)), sal = 1 - U.tramo(t, 9600, 11000);
+          var g = U.sale(U.tramo(t, 300, 2200)), sal = 1 - U.tramo(t, 9600 + L, 11000 + L);
           ctx.setLineDash([2, 5]); ctx.lineWidth = 1; ctx.strokeStyle = U.rgba(C.acento, 0.4 * sal);
           ctx.beginPath(); FX.circulo([0, 1, 0], 90, g, 240, Math.PI); ctx.stroke();
           ctx.beginPath(); FX.circulo([1, 0, 0], 90, g, 240, Math.PI / 2); ctx.stroke();
           ctx.setLineDash([]);
         },
         frente: function (ctx, t) {
-          var sal = 1 - U.tramo(t, 9300, 11000), llegados = 0;
+          var sal = 1 - U.tramo(t, 9300 + L, 11000 + L), llegados = 0;
           // estelas y cabezas de los datos en vuelo
           ctx.lineWidth = 1; ctx.strokeStyle = U.rgba(C.acento, 0.32 * sal); ctx.beginPath();
           var cabezas = [], quietos = [];

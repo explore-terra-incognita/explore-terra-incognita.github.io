@@ -40,6 +40,7 @@
       });
     },
     escena: function (E) {
+      var L = E.lectura;   // tiempo extra para leer la tarjeta (motor.js)
       var marca = null, celdas = null, anchoCel = 0, altoCel = 0, ctxScan = null;
       function lineas(ctx) {   // líneas de barrido, una vez
         if (ctxScan) return ctxScan;
@@ -47,12 +48,12 @@
         var x = c.getContext('2d'); x.fillStyle = 'rgba(0,0,0,0.28)'; x.fillRect(0, 2, 4, 1);
         ctxScan = ctx.createPattern(c, 'repeat'); return ctxScan;
       }
-      function tamCelda(t) { return Math.round(U.lerp(2, 8, U.sale(U.tramo(t, 300, 1300))) * (1 - U.tramo(t, 9300, 10300)) + 2 * U.tramo(t, 9300, 10300)); }
+      function tamCelda(t) { return Math.round(U.lerp(2, 8, U.sale(U.tramo(t, 300, 1300))) * (1 - U.tramo(t, 9300 + L, 10300 + L)) + 2 * U.tramo(t, 9300 + L, 10300 + L)); }
       return {
-        duracion: 10800,
+        duracion: 10800 + L,
         sinAtmosfera: true,
         tarjeta: {
-          en: 3800, hasta: 9300, retro: true,
+          en: 3800, hasta: 9300 + L, retro: true,
           titulo: 'CÓDIGO KONAMI',
           texto: '↑ ↑ ↓ ↓ ← → ← → B A. Kazuhisa Hashimoto lo metió en Gradius (1986) para no perder vidas mientras probaba el juego, y se quedó dentro. Desde entonces muchas webs lo esconden. Esta también.',
           pie: '+30 vidas en Contra (1988)'
@@ -60,11 +61,11 @@
         inicio: function () { E.camaraZoom(1.08, 900); },
         cuadro: function (t, dt) { E.girarPropio(dt * 0.0005); },
         fondo: function (ctx, t) {
-          var a = U.meseta(t, 0, 600, 9600, 10600);
+          var a = U.meseta(t, 0, 600, 9600 + L, 10600 + L);
           ctx.fillStyle = U.rgba(PAL[0], 0.55 * a); ctx.fillRect(0, 0, E.W, E.H);
         },
         puntos: function (ctx, t) {
-          var a = U.meseta(t, 0, 500, 9700, 10500), cel = tamCelda(t), P = E.P;
+          var a = U.meseta(t, 0, 500, 9700 + L, 10500 + L), cel = tamCelda(t), P = E.P;
           if (a < 0.02) { E.dibujarPuntos(); return; }
           // el disco: océano en el tono más oscuro, a cuadros
           var w = Math.ceil(E.W / cel) + 1, h = Math.ceil(E.H / cel) + 1;
@@ -93,7 +94,7 @@
           if (a < 1) E.dibujarPuntos({ alfa: 1 - a });
         },
         frente: function (ctx, t) {
-          var a = U.meseta(t, 600, 1200, 9300, 10200);
+          var a = U.meseta(t, 600, 1200, 9300 + L, 10200 + L);
           if (a > 0) {
             // la nave da vueltas al mundo (pasa por detrás)
             var px = 4, ang = (t - 600) * 0.0012, ex = Math.cos(ang) * E.R * 1.35, ey = Math.sin(ang) * E.R * 0.32, delante = Math.sin(ang) > -0.1;
@@ -114,7 +115,7 @@
               pixelTexto(ctx, '1UP', Math.round((E.cx + E.R * 0.9) / 3) * 3, Math.round((E.cy + E.R * 0.8) / 3) * 3, 3, U.rgba(PAL[2], a * v * (Math.sin(t * 0.01) > 0 ? 1 : 0.3)));
             }
           }
-          var s = U.meseta(t, 0, 500, 9800, 10600);
+          var s = U.meseta(t, 0, 500, 9800 + L, 10600 + L);
           if (s > 0) { ctx.globalAlpha = s; ctx.fillStyle = lineas(ctx); ctx.fillRect(0, 0, E.W, E.H); ctx.globalAlpha = 1; }
         }
       };

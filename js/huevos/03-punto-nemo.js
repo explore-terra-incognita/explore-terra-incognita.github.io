@@ -16,6 +16,7 @@
       api.en('clic', function (d) { if (api.motor.cercaDe(d, NEMO[0], NEMO[1], 3, 14)) api.disparar(); });
     },
     escena: function (E) {
+      var L = E.lectura;   // tiempo extra para leer la tarjeta (motor.js)
       var n = G.vec(NEMO[0], NEMO[1]), r = U.azar(303);
       var orillas = ORILLAS.map(function (o) { return { nombre: o[0], v: G.vec(o[1], o[2]), km: G.dist(NEMO[0], NEMO[1], o[1], o[2]) * G.KM_GRADO }; });
       var radio = orillas.reduce(function (s, o) { return s + o.km; }, 0) / orillas.length / G.KM_GRADO;
@@ -31,17 +32,17 @@
       for (var i = 0; i < 9; i++) caidas.push({ t0: 3300 + i * 520 + r() * 260, dur: 900 + r() * 500, x: 0.7 + r() * 0.9, y: -0.2 - r() * 0.5, off: [(r() - 0.5) * 2.5, (r() - 0.5) * 2.5] });
       var q = [0, 0, 0, 0], q2 = [0, 0, 0, 0];
       return {
-        duracion: 12500,
+        duracion: 12500 + L,
         tarjeta: {
-          en: 4600, hasta: 11000,
+          en: 4600, hasta: 11000 + L,
           titulo: 'Punto Nemo',
           texto: 'El lugar del océano más lejos de cualquier tierra: ' + U.num(Math.round(radio * G.KM_GRADO)) + ' km hasta la orilla más cercana. Es el cementerio de las naves espaciales. Y cuando la Estación Espacial pasa por encima, a unos 400 km, las personas más cercanas están allí arriba.',
           pie: '48°53′ S · 123°24′ O · Pacífico Sur'
         },
         inicio: function () { E.camara(NEMO[0] + 4, NEMO[1], 1.3, 1900); },
         puntos: function (ctx, t) {
-          E.dibujarPuntos({ alfa: 1 - 0.4 * U.meseta(t, 400, 1600, 10600, 12300) });
-          var sal = 1 - U.tramo(t, 10600, 12300);
+          E.dibujarPuntos({ alfa: 1 - 0.4 * U.meseta(t, 400, 1600, 10600 + L, 12300 + L) });
+          var sal = 1 - U.tramo(t, 10600 + L, 12300 + L);
           // las tres orillas, a la misma distancia
           ctx.lineWidth = 1;
           orillas.forEach(function (o, i) {
@@ -60,7 +61,7 @@
           if (c > 0) { ctx.strokeStyle = U.rgba(C.acento, 0.5 * sal); ctx.lineWidth = 1.2; ctx.beginPath(); FX.circulo(n, radio, c, 200); ctx.stroke(); }
         },
         frente: function (ctx, t) {
-          var sal = 1 - U.tramo(t, 10600, 12300);
+          var sal = 1 - U.tramo(t, 10600 + L, 12300 + L);
           E.proy(n, q); var nx = q[0], ny = q[1];
           FX.ondas(nx, ny, 3, 26, 3, t / 2200, C.acento, 0.6 * sal, 1);
           ctx.fillStyle = U.rgba(C.acento, sal); ctx.beginPath(); ctx.arc(nx, ny, 2.6, 0, TAU); ctx.fill();
@@ -83,8 +84,8 @@
           });
           // la Estación Espacial
           var fi = (t - 6600) / 2600 * 0.9;
-          if (t > 4200 && t < 11500) {
-            var a = U.meseta(t, 4200, 5000, 10600, 11500);
+          if (t > 4200 && t < 11500 + L) {
+            var a = U.meseta(t, 4200, 5000, 10600 + L, 11500 + L);
             ctx.lineWidth = 1; ctx.strokeStyle = U.rgba(C.hueso, 0.22 * a); ctx.beginPath();
             var dentro = false;
             for (var j = -60; j <= 60; j++) {

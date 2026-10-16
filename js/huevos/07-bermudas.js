@@ -40,6 +40,7 @@
       });
     },
     escena: function (E) {
+      var L = E.lectura;   // tiempo extra para leer la tarjeta (motor.js)
       var c = G.vec(CEN[0], CEN[1]), r = U.azar(707), agua = [];
       // agua extra para que el remolino tenga de qué tirar
       for (var i = 0; i < 900; i++) {
@@ -62,9 +63,9 @@
       }
       var tmp = [0, 0, 0];
       return {
-        duracion: 10500,
+        duracion: 10500 + L,
         tarjeta: {
-          en: 4200, hasta: 9800,
+          en: 4200, hasta: 9800 + L,
           titulo: 'Triángulo de las Bermudas',
           texto: 'Su fama de tragarse barcos y aviones no aguanta los datos: aquí no desaparece más que en cualquier otro mar igual de transitado. Lo único que se pierde de verdad es tu cursor.',
           pie: 'Miami · Bermudas · San Juan · ' + U.num(Math.round(km2 / 1000) * 1000) + ' km²'
@@ -81,7 +82,7 @@
             if (P.mz[j] < 0.02) continue; remolino(P.mx[j], P.my[j], t, tmp);
             var rm = rT * 0.6 * tmp[2]; if (rm < 0.1) continue; mar.moveTo(tmp[0] + rm, tmp[1]); mar.arc(tmp[0], tmp[1], rm, 0, TAU);
           }
-          var va = U.meseta(t, 900, 1900, 8600, 10000);
+          var va = U.meseta(t, 900, 1900, 8600 + L, 10000 + L);
           if (va > 0) for (var k = 0; k < agua.length; k++) {
             E.proy(agua[k], q); if (q[2] < 0.02) continue; remolino(q[0], q[1], t, tmp);
             var ra = 0.9 * tmp[2]; aguaP.moveTo(tmp[0] + ra, tmp[1]); aguaP.arc(tmp[0], tmp[1], ra, 0, TAU);
@@ -91,7 +92,7 @@
           ctx.fillStyle = U.rgba(C.hueso, 0.9); ctx.fill(tierra);
         },
         frente: function (ctx, t) {
-          var sal = 1 - U.tramo(t, 8800, 10300);
+          var sal = 1 - U.tramo(t, 8800 + L, 10300 + L);
           // el triángulo
           var f = U.inOut(U.tramo(t, 700, 2000));
           ctx.strokeStyle = U.rgba(C.acento, 0.85 * sal); ctx.lineWidth = 1.3; ctx.beginPath();

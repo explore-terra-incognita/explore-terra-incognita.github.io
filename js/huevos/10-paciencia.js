@@ -15,6 +15,7 @@
       });
     },
     escena: function (E, datos) {
+      var L = E.lectura;   // tiempo extra para leer la tarjeta (motor.js)
       var ahora = new Date(), sol = G.sol(ahora), s = G.vec(sol[0], sol[1]);
       var seg = (datos && datos.segundos) || E.segundosDesdeCarga();
       var grados = seg * 360 / DIA, km = seg * ORBITA_KM_S;
@@ -27,17 +28,17 @@
       var lonVista = sol[1] + 72, latVista = 18;
       var q = [0, 0, 0, 0];
       var hh = U.dos(ahora.getUTCHours()) + ':' + U.dos(ahora.getUTCMinutes());
-      function noche(t) { return U.lerp(-1.08, 0.02, U.inOut(U.tramo(t, 1600, 4200))) * (1 - U.tramo(t, 11400, 13000)) + (-1.08) * U.tramo(t, 11400, 13000); }
+      function noche(t) { return U.lerp(-1.08, 0.02, U.inOut(U.tramo(t, 1600, 4200))) * (1 - U.tramo(t, 11400 + L, 13000 + L)) + (-1.08) * U.tramo(t, 11400 + L, 13000 + L); }
       return {
-        duracion: 13400,
+        duracion: 13400 + L,
         tarjeta: {
-          en: 4600, hasta: 11400,
+          en: 4600, hasta: 11400 + L,
           titulo: 'Paciencia',
           texto: 'Así está el mundo ahora mismo: medio de día, medio de noche, con las ciudades encendidas. Mientras esperabas, la Tierra de verdad ha girado ' + U.num(grados, 2) + '° y ha avanzado ' + U.num(km) + ' km en su órbita alrededor del Sol.',
           pie: 'UTC ' + hh + ' · Sol en el cénit sobre ' + G.gms(sol[0], sol[1])
         },
         inicio: function () { E.camara(latVista, lonVista, 1.22, 2400); },
-        cuadro: function (t) { E.brilloEstrellas = 1 + 0.5 * U.meseta(t, 2000, 4000, 11000, 13000); },
+        cuadro: function (t) { E.brilloEstrellas = 1 + 0.5 * U.meseta(t, 2000, 4000, 11000 + L, 13000 + L); },
         puntos: function (ctx, t) {
           var P = E.P, lim = noche(t), rT = E.radioPunto();
           var dia = [new Path2D(), new Path2D()], oscuro = new Path2D(), ocaso = new Path2D();
@@ -55,7 +56,7 @@
           ctx.fillStyle = U.rgba(C.hueso, 0.95); ctx.fill(dia[1]);
           // la luz del Sol en el borde del disco
           var sv = [E.rot[0] * s[0] + E.rot[1] * s[1] + E.rot[2] * s[2], E.rot[3] * s[0] + E.rot[4] * s[1] + E.rot[5] * s[2]];
-          var la = U.meseta(t, 1800, 3600, 11400, 13000);
+          var la = U.meseta(t, 1800, 3600, 11400 + L, 13000 + L);
           if (la > 0) {
             ctx.save(); ctx.beginPath(); ctx.arc(E.cx, E.cy, E.R, 0, TAU); ctx.clip();
             FX.brillo(E.cx + sv[0] * E.R, E.cy - sv[1] * E.R, E.R * 1.3, [255, 236, 200], 0.12 * la);
@@ -65,7 +66,7 @@
           }
         },
         frente: function (ctx, t) {
-          var lim = noche(t), a = U.meseta(t, 2600, 4400, 11200, 12800); if (a <= 0) return;
+          var lim = noche(t), a = U.meseta(t, 2600, 4400, 11200 + L, 12800 + L); if (a <= 0) return;
           ctx.save(); ctx.globalCompositeOperation = 'lighter';
           var halo = new Path2D(), nucleo = new Path2D();
           for (var i = 0; i < ciudades.length; i++) {

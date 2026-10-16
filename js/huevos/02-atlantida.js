@@ -37,6 +37,7 @@
       });
     },
     escena: function (E) {
+      var L = E.lectura;   // tiempo extra para leer la tarjeta (motor.js)
       var m = marco(A[0], A[1]), r = U.azar(202), pts = [];
       // una rejilla hexagonal y, de ella, solo lo que es tierra en el plano de Platón (anillos de tierra y agua)
       var paso = 0.22, lim = Math.ceil(7.5 / paso);
@@ -53,7 +54,7 @@
           else continue;
           if (zona > 0 && Math.abs(dx) < 0.28 && dy < 0) continue;   // el canal hacia el mar, al sur
           h *= 0.8 + r() * 0.4;
-          pts.push({ v: local(m, dx, dy), z: zona, h: h, t0: 1700 + zona * 380 + r() * 420 + d * 120, hund: 9000 + (3 - zona) * 260 + r() * 300 });
+          pts.push({ v: local(m, dx, dy), z: zona, h: h, t0: 1700 + zona * 380 + r() * 420 + d * 120, hund: 9000 + L + (3 - zona) * 260 + r() * 300 });
         }
       }
       var base = [0, 0, 0, 0], cima = [0, 0, 0, 0], q = [0, 0, 0, 0];
@@ -62,9 +63,9 @@
         return p.h * sube * (1 - baja);
       }
       return {
-        duracion: 12000,
+        duracion: 12000 + L,
         tarjeta: {
-          en: 4300, hasta: 10200,
+          en: 4300, hasta: 10200 + L,
           titulo: 'Atlántida',
           texto: 'Anillos de tierra y de agua alrededor de una isla con un templo, «más allá de las columnas de Hércules». Platón la describió hacia el 360 a.&nbsp;C. y la hundió en el mar en un solo día y una noche.',
           pie: 'Platón · Timeo y Critias'
@@ -73,9 +74,9 @@
         // de lado y de cerca: el centro del globo queda por debajo de la pantalla, para que se vea el relieve
         inicio: function () { var Z = 3.9, Rt = E.Rbase * Z; E.camara(A[0] - 40, A[1], Z, 2100, 0, null, E.H * 0.38 + Math.sin(40 * D2R) * Rt - E.H / 2); },
         puntos: function (ctx, t) {
-          E.dibujarPuntos({ alfa: 1 - 0.35 * U.meseta(t, 500, 1600, 9800, 11500) });
+          E.dibujarPuntos({ alfa: 1 - 0.35 * U.meseta(t, 500, 1600, 9800 + L, 11500 + L) });
           // los anillos de agua, que ondean
-          var a = U.meseta(t, 1200, 2400, 9600, 11400);
+          var a = U.meseta(t, 1200, 2400, 9600 + L, 11400 + L);
           if (a > 0) {
             ctx.lineWidth = 1;
             for (var i = 0; i < AGUA.length; i++) {
@@ -84,7 +85,7 @@
             }
           }
           // ondas al hundirse
-          var h = U.tramo(t, 9200, 12000);
+          var h = U.tramo(t, 9200 + L, 12000 + L);
           if (h > 0 && h < 1) {
             for (var k = 0; k < 3; k++) {
               var f = U.clamp(h * 1.4 - k * 0.2, 0, 1); if (f <= 0) continue;
@@ -110,7 +111,7 @@
           for (var k = 0; k < altos.length; k += 2) { ctx.moveTo(altos[k] + rT * 1.1, altos[k + 1]); ctx.arc(altos[k], altos[k + 1], rT * 1.1, 0, TAU); }
           ctx.fill();
           // la luz del templo
-          var luz = U.meseta(t, 3600, 4600, 8600, 9600);
+          var luz = U.meseta(t, 3600, 4600, 8600 + L, 9600 + L);
           if (luz > 0) {
             E.proy(m.c, base, 0.075); E.proy(m.c, q, 0.075 + 0.4 * luz);
             var g = ctx.createLinearGradient(base[0], base[1], q[0], q[1]);

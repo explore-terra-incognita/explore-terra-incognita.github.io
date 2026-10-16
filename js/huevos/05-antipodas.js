@@ -49,6 +49,7 @@
       });
     },
     escena: function (E, datos) {
+      var L = E.lectura;   // tiempo extra para leer la tarjeta (motor.js)
       var A = (datos && datos.a) || [40.4168, -3.7038], B = (datos && datos.b) || G.antipoda(A[0], A[1]);
       var va = G.vec(A[0], A[1]), vb = G.vec(B[0], B[1]);
       // una vista en la que A y B quedan a izquierda y derecha, un poco girada para que se vea el volumen
@@ -63,9 +64,9 @@
       var pct = U.num(window.TI_DATOS.antipodas * 100, 1);
       var qa = [0, 0, 0, 0], qb = [0, 0, 0, 0];
       return {
-        duracion: 11500,
+        duracion: 11500 + L,
         tarjeta: {
-          en: 5000, hasta: 10600,
+          en: 5000, hasta: 10600 + L,
           titulo: 'Antípodas',
           texto: 'Has atravesado la Tierra: ' + U.num(DIAMETRO) + ' km en línea recta, pasando por el núcleo. ' +
             (tierraB ? 'Tu antípoda cae en tierra firme, cosa rara: ' : 'Tu antípoda cae en el mar, como casi siempre: ') +
@@ -74,7 +75,7 @@
         },
         inicio: function () { E.camaraM(M, 1.05, 2000); },
         puntos: function (ctx, t) {
-          var x = U.meseta(t, 1400, 2400, 9600, 11200);
+          var x = U.meseta(t, 1400, 2400, 9600 + L, 11200 + L);
           E.dibujarPuntos({ alfa: 1 - 0.45 * x, dorso: 0.22 * x });
           // capas de la Tierra (a escala): manto, núcleo externo, núcleo interno
           if (x > 0) {
@@ -88,7 +89,7 @@
           }
         },
         frente: function (ctx, t) {
-          var sal = 1 - U.tramo(t, 9800, 11300);
+          var sal = 1 - U.tramo(t, 9800 + L, 11300 + L);
           E.proy(va, qa); E.proy(vb, qb);
           var ent = U.tramo(t, 1500, 2100) * sal;
           FX.marca(qa[0], qa[1], 'A', ent, C.acento, 'izq');

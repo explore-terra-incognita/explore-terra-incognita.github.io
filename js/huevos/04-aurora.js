@@ -27,6 +27,7 @@
       });
     },
     escena: function (E, datos) {
+      var L = E.lectura;   // tiempo extra para leer la tarjeta (motor.js)
       var polo = (datos && datos.polo) || 'norte', P = POLOS[polo], sur = polo === 'sur';
       var c = G.vec(P[0], P[1]), e = Math.abs(c[1]) > 0.99 ? [1, 0, 0] : [c[2], 0, -c[0]], le = Math.hypot(e[0], e[1], e[2]); e = [e[0] / le, e[1] / le, e[2] / le];
       var nn = [c[1] * e[2] - c[2] * e[1], c[2] * e[0] - c[0] * e[2], c[0] * e[1] - c[1] * e[0]];
@@ -38,20 +39,20 @@
         return o;
       }
       return {
-        duracion: 12500,
+        duracion: 12500 + L,
         atmosfera: 0.6,
         tarjeta: {
-          en: 4200, hasta: 11000,
+          en: 4200, hasta: 11000 + L,
           titulo: sur ? 'Aurora austral' : 'Aurora boreal',
           texto: 'El viento solar choca con el oxígeno del aire a más de 100 km de altura y lo hace brillar en verde. Por eso la aurora dibuja un anillo alrededor del polo geomagnético, no del polo geográfico.',
           pie: 'Polo geomagnético ' + (sur ? 'sur' : 'norte') + ' · ' + G.gms(P[0], P[1]) + ' (aprox.)'
         },
         // el polo, alto y de lado: así las cortinas se levantan sobre el horizonte
         inicio: function () { E.camara(sur ? -38 : 38, P[1] + (sur ? -15 : -20), 1.3, 2200, 0, null, sur ? -E.H * 0.06 : E.H * 0.1); },
-        cuadro: function (t) { E.brilloEstrellas = 1 + 0.8 * U.meseta(t, 800, 2400, 10500, 12400); },
-        puntos: function (ctx, t) { E.dibujarPuntos({ alfa: 1 - 0.35 * U.meseta(t, 600, 2000, 10500, 12400) }); },
+        cuadro: function (t) { E.brilloEstrellas = 1 + 0.8 * U.meseta(t, 800, 2400, 10500 + L, 12400 + L); },
+        puntos: function (ctx, t) { E.dibujarPuntos({ alfa: 1 - 0.35 * U.meseta(t, 600, 2000, 10500 + L, 12400 + L) }); },
         frente: function (ctx, t) {
-          var a = U.meseta(t, 1200, 3400, 9800, 12300); if (a <= 0) return;
+          var a = U.meseta(t, 1200, 3400, 9800 + L, 12300 + L); if (a <= 0) return;
           for (var k = 0; k < 9; k++) caminos[k] = new Path2D();
           var tt = t * 0.001;
           for (var j = 0; j < N; j++) {
@@ -80,7 +81,7 @@
           ctx.restore();
           // el polo geomagnético
           E.proy(c, base);
-          if (base[2] > 0) { var m = U.tramo(t, 3000, 3800) * (1 - U.tramo(t, 10500, 12000)); FX.marca(base[0], base[1], 'POLO GEOMAGNÉTICO', m * 0.85, C.hueso); }
+          if (base[2] > 0) { var m = U.tramo(t, 3000, 3800) * (1 - U.tramo(t, 10500 + L, 12000 + L)); FX.marca(base[0], base[1], 'POLO GEOMAGNÉTICO', m * 0.85, C.hueso); }
         }
       };
     }

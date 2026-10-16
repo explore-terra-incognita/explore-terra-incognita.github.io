@@ -12,6 +12,7 @@
       api.en('cuadro', function (d) { if (d.giro2s > UMBRAL) api.disparar({ vueltas: d.giro2s / TAU }); });
     },
     escena: function (E, datos) {
+      var L = E.lectura;   // tiempo extra para leer la tarjeta (motor.js)
       var vueltas = (datos && datos.vueltas) || 2.4, giro = 0, vel = 0, maxVel = 0, rotBase = null, dias = 0;
       var q = [0, 0, 0, 0], T = E.tierra.xyz, NT = E.tierra.n;
       function velocidad(t) {   // rad/s
@@ -22,9 +23,9 @@
       function achatado(t) { return 0.2 * U.meseta(t, 2600, 4400, 6200, 8600); }
       function bamboleo(t) { return 0.14 * Math.sin((t - 8000) * 0.009) * U.meseta(t, 8000, 8600, 9200, 11000); }
       return {
-        duracion: 11500,
+        duracion: 11500 + L,
         tarjeta: {
-          en: 4000, hasta: 10400,
+          en: 4000, hasta: 10400 + L,
           titulo: 'Vértigo',
           texto: function () {
             return 'La Tierra de verdad tarda 23 h 56 min en dar una vuelta, y aun así se achata: el ecuador sobresale 21 km más que los polos. ' +

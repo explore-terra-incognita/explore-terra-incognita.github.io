@@ -22,18 +22,19 @@
       });
     },
     escena: function (E) {
+      var L = E.lectura;   // tiempo extra para leer la tarjeta (motor.js)
       var R0 = null, ROTA = -0.11;
       function radio(t) {
         if (R0 === null) return E.R;
         if (t < 3600) return R0 * Math.pow(1.1 / R0, U.inOut(t / 3600));
-        if (t < 11000) return 1.1;
-        return 1.1 * Math.pow(R0 / 1.1, U.inOut(U.tramo(t, 11000, 13400)));
+        if (t < 11000 + L) return 1.1;
+        return 1.1 * Math.pow(R0 / 1.1, U.inOut(U.tramo(t, 11000 + L, 13400 + L)));
       }
       return {
-        duracion: 13600,
+        duracion: 13600 + L,
         sinAtmosfera: true,
         tarjeta: {
-          en: 5000, hasta: 10600,
+          en: 5000, hasta: 10600 + L,
           titulo: 'Un punto azul pálido',
           texto: 'Así se ve la Tierra desde unos 6.000 millones de kilómetros. La Voyager 1 se dio la vuelta el 14 de febrero de 1990 para hacer una última foto de casa. Todo lo que conoces cabe en ese píxel.',
           pie: 'Voyager 1 · 14.02.1990'
@@ -41,12 +42,12 @@
         inicio: function () { R0 = E.Rbase * E.zoom; },
         cuadro: function (t) {
           E.zoom = radio(t) / E.Rbase;
-          E.brilloEstrellas = 1 - 0.85 * U.meseta(t, 1500, 3800, 10800, 13000);
-          if (t > 13300) E.zoom = R0 / E.Rbase;
+          E.brilloEstrellas = 1 - 0.85 * U.meseta(t, 1500, 3800, 10800 + L, 13000 + L);
+          if (t > 13300 + L) E.zoom = R0 / E.Rbase;
         },
         fondo: function (ctx, t) {
           // los rayos de luz dispersa del Sol en la óptica de la cámara
-          var a = U.meseta(t, 2600, 4600, 10600, 12600); if (a <= 0) return;
+          var a = U.meseta(t, 2600, 4600, 10600 + L, 12600 + L); if (a <= 0) return;
           ctx.save(); ctx.translate(E.W / 2, E.H / 2); ctx.rotate(ROTA); ctx.translate(-E.W / 2, -E.H / 2);
           ctx.globalCompositeOperation = 'lighter';
           RAYOS.forEach(function (r, i) {
@@ -66,7 +67,7 @@
           ctx.fillStyle = U.rgba(col, 0.95); ctx.beginPath(); ctx.arc(E.cx, E.cy, Math.max(0.9, R), 0, TAU); ctx.fill();
         },
         frente: function (ctx, t) {
-          var a = U.meseta(t, 4400, 5200, 10200, 11000); if (a <= 0) return;
+          var a = U.meseta(t, 4400, 5200, 10200 + L, 11000 + L); if (a <= 0) return;
           var x = E.cx, y = E.cy;
           ctx.strokeStyle = U.rgba(C.hueso, 0.45 * a); ctx.lineWidth = 1;
           ctx.beginPath(); ctx.arc(x, y, 9, 0, TAU); ctx.stroke();

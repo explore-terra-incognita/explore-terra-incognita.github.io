@@ -184,6 +184,7 @@
     puntero: { x: -999, y: -999, dentro: false, lat: 0, lon: 0, sobre: false, tipo: 'mouse' },
     senal: 0, lenteOculta: false, cursorOculto: false,
     escena: null, bloqueado: false, ligero: false,
+    lectura: 5000,  // ms extra que la tarjeta de cada secreto se queda en pantalla (Pau, 16-10-2026: «no da tiempo a leerlo»)
     ultimoInput: 0, giroAuto: 0, estela: 0, compresion: 0,
     tierra: { n: NT, xyz: TIERRA }, mar: { n: NM, xyz: MAR },
     P: {
