@@ -50,6 +50,8 @@
   I.disparar = function (h, datos, op) {
     op = op || {};
     if (E.escena || !$('intro').hidden || !$('creditos').hidden || h.mundo !== E.mundo) return false;
+    // un secreto ya encontrado no vuelve a salir solo (Pau, 01/11: molestaban mientras buscabas los otros); se vuelve a ver desde el cuaderno
+    if (estado.hallados[h.id] && !op.cuaderno && !op.prueba) return false;
     cerrarCuaderno();
     var nuevo = !estado.hallados[h.id] && !op.prueba, m = h.mundo, total = delMundo(m).length;
     if (nuevo) { estado.hallados[h.id] = Date.now(); guardar(); }
@@ -195,7 +197,7 @@
         if (ok) meta.appendChild(el('span', '', 'Encontrado ' + fecha(estado.hallados[h.id])));
         var b = el('button', 'e-ver', ok ? '↻ Ver otra vez' : '▶ Probar');
         b.type = 'button';
-        b.addEventListener('click', function () { I.disparar(h, null, { prueba: !ok }); });
+        b.addEventListener('click', function () { I.disparar(h, null, { prueba: !ok, cuaderno: true }); });
         meta.appendChild(b); c.appendChild(meta);
       }
       li.appendChild(c); ol.appendChild(li);
